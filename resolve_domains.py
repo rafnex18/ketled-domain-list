@@ -1,9 +1,9 @@
 import socket
-import requests
 from datetime import datetime
 
-INPUT_FILE = "KETLED-DOMAIN-LIST.txt"
+INPUT_FILE = "domains.txt"
 OUTPUT_FILE = "resolved_ips.txt"
+
 
 def read_domains(filename):
     """Read domain list from file, skipping comments and blanks."""
@@ -15,14 +15,24 @@ def read_domains(filename):
         print(f"⚠️ No {filename} found — nothing to resolve.")
         return []
 
+
 def resolve_domain(domain):
-    """Resolve a single domain to an IP address."""
+    """Resolve a single domain to IPv4 and IPv6 addresses, add CIDR notation."""
     try:
-        ip = socket.gethostbyname(domain)
-        return ip
+        infos = socket.getaddrinfo(domain, None)
+        ips = set()
+        for info in infos:
+            family, _, _, _, sockaddr = info
+            ip = sockaddr[0]
+            if family == socket.AF_INET:
+                ips.add(f"{ip}/32")
+            elif family == socket.AF_INET6:
+                ips.add(f"{ip}/128")
+        return list(ips)
     except Exception as e:
         print(f"❌ Failed to resolve {domain}: {e}")
-        return None
+        return []
+
 
 def save_ips(ips, filename):
     """Save sorted unique IPs to file."""
@@ -31,6 +41,7 @@ def save_ips(ips, filename):
         for ip in unique_ips:
             f.write(ip + "\n")
     print(f"✅ Saved {len(unique_ips)} unique IPs to {filename}")
+
 
 def main():
     print(f"🚀 Starting domain resolution at {datetime.utcnow().isoformat()}Z")
@@ -41,9 +52,10 @@ def main():
 
     resolved_ips = []
     for domain in domains:
-        ip = resolve_domain(domain)
-        if ip:
-            resolved_ips.append(ip)
+        ips = resolve_domain(domain)
+        if ips:
+            print(f"🌐 {domain} → {', '.join(ips)}")
+            resolved_ips.extend(ips)
 
     if resolved_ips:
         save_ips(resolved_ips, OUTPUT_FILE)
@@ -51,6 +63,7 @@ def main():
         print("⚠️ No domains resolved successfully.")
 
     print("✅ Domain resolution completed.")
+
 
 if __name__ == "__main__":
     main()
