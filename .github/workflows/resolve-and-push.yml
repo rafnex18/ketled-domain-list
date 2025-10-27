@@ -24,8 +24,22 @@ jobs:
       - name: Run domain resolution script
         run: |
           python resolve_domains.py
+          echo "✅ Domain resolution script completed."
+
+      - name: Show number of resolved IPs
+        id: ip_count
+        run: |
+          if [ -f resolved_ips.txt ]; then
+            COUNT=$(wc -l < resolved_ips.txt | xargs)
+            echo "✅ $COUNT IPs resolved successfully."
+            echo "count=$COUNT" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ No resolved_ips.txt file found."
+            echo "count=0" >> $GITHUB_OUTPUT
+          fi
 
       - name: Push resolved IPs to KETLED-IP-LIST repo
+        if: steps.ip_count.outputs.count != '0'  # only run if there are IPs
         env:
           TOKEN: ${{ secrets.KETLED_PUSH_TOKEN }}
         run: |
@@ -35,5 +49,15 @@ jobs:
           mv resolved_ips.txt iplist/
           cd iplist
           git add resolved_ips.txt
-          git commit -m "Update resolved IP list from ketled-domain-list"
-          git push
+
+          if git diff --cached --quiet; then
+            echo "✅ No changes detected — nothing to commit."
+          else
+            git commit -m "🔄 Update resolved IP list from ketled-domain-list"
+            git push
+            echo "✅ Changes committed and pushed successfully."
+          fi
+
+      - name: Skip push (no IPs)
+        if: steps.ip_count.outputs.count == '0'
+        run: echo "⚠️ No IPs found — skipping push."
