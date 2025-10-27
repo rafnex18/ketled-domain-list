@@ -2,7 +2,7 @@ name: Resolve Domains and Push IPs
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # Every 30 minutes
+    - cron: '*/30 * * * *'  # Runs every 30 minutes
   workflow_dispatch:
 
 jobs:
@@ -35,5 +35,8 @@ jobs:
           mv resolved_ips.txt iplist/
           cd iplist
           git add resolved_ips.txt
-          git commit -m "Update resolved IP list from ketled-domain-list"
-          git push
+          if ! git diff --cached --quiet; then
+            git commit -m "Update resolved IP list from ketled-domain-list"
+            git push
+          else
+            echo "No changes to commit."
