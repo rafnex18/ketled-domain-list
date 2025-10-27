@@ -2,7 +2,7 @@ name: Resolve Domains and Push IPs
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # Every 30 minutes
+    - cron: '*/30 * * * *'  # Runs every 30 minutes
   workflow_dispatch:
 
 jobs:
@@ -19,10 +19,12 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install requests
+        run: |
+          pip install requests
 
       - name: Run domain resolution script
-        run: python resolve_domains.py
+        run: |
+          python resolve_domains.py
 
       - name: Clone KETLED-IP-LIST repo
         env:
