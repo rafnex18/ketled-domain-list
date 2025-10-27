@@ -1,3 +1,0 @@
-www.mevzuat.gov.tr
-*.wwwexpress.com.ph
-*.wexpress.com.ph
