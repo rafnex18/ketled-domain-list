@@ -35,12 +35,13 @@ jobs:
           git clone https://x-access-token:${TOKEN}@github.com/rafnex18/KETLED-IP-LIST.git iplist
 
       - name: Copy and commit resolved IPs
-        run: |
-          mv resolved_ips.txt iplist/
-          cd iplist
-          git add resolved_ips.txt
-          if ! git diff --cached --quiet; then
-            git commit -m "Update resolved IP list from ketled-domain-list"
-            git push
-          else
-            echo "No changes to commit."
+  run: |
+    mv resolved_ips.txt iplist/ && \
+    cd iplist && \
+    git add resolved_ips.txt && \
+    if ! git diff --cached --quiet; then \
+      git commit -m "Update resolved IP list from ketled-domain-list" && \
+      git push; \
+    else \
+      echo "No changes to commit."; \
+    fi
