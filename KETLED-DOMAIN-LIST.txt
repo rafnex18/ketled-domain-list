@@ -4,4 +4,3 @@ onlinebooking.wexpress.com.ph
 *.mevzuat.gov.tr
 www.facebook.com
 www.yahoo.com
-
