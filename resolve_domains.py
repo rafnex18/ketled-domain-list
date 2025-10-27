@@ -1,29 +1,56 @@
 import socket
+import requests
+from datetime import datetime
 
-def get_ip_with_prefix(domain):
+INPUT_FILE = "KETLED-DOMAIN-LIST.txt"
+OUTPUT_FILE = "resolved_ips.txt"
+
+def read_domains(filename):
+    """Read domain list from file, skipping comments and blanks."""
     try:
-        info = socket.getaddrinfo(domain, None)
-        ips = set()
-        for result in info:
-            ip = result[4][0]
-            if ':' in ip:
-                ips.add(f"{ip}/128")  # IPv6
-            else:
-                ips.add(f"{ip}/32")   # IPv4
-        return list(ips)
-    except socket.gaierror:
+        with open(filename, "r") as f:
+            domains = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+        return domains
+    except FileNotFoundError:
+        print(f"⚠️ No {filename} found — nothing to resolve.")
         return []
 
-# Read domain list
-with open("KETLED-DOMAIN-LIST.txt", "r") as f:
-    domains = [line.strip() for line in f if line.strip()]
+def resolve_domain(domain):
+    """Resolve a single domain to an IP address."""
+    try:
+        ip = socket.gethostbyname(domain)
+        return ip
+    except Exception as e:
+        print(f"❌ Failed to resolve {domain}: {e}")
+        return None
 
-resolved_ips = set()
+def save_ips(ips, filename):
+    """Save sorted unique IPs to file."""
+    unique_ips = sorted(set(ips))
+    with open(filename, "w") as f:
+        for ip in unique_ips:
+            f.write(ip + "\n")
+    print(f"✅ Saved {len(unique_ips)} unique IPs to {filename}")
 
-for domain in domains:
-    resolved_ips.update(get_ip_with_prefix(domain))
+def main():
+    print(f"🚀 Starting domain resolution at {datetime.utcnow().isoformat()}Z")
+    domains = read_domains(INPUT_FILE)
+    if not domains:
+        print("⚠️ No domains to resolve.")
+        return
 
-# Write to file
-with open("resolved_ips.txt", "w") as f:
-    for ip in sorted(resolved_ips):
-        f.write(ip + "\n")
+    resolved_ips = []
+    for domain in domains:
+        ip = resolve_domain(domain)
+        if ip:
+            resolved_ips.append(ip)
+
+    if resolved_ips:
+        save_ips(resolved_ips, OUTPUT_FILE)
+    else:
+        print("⚠️ No domains resolved successfully.")
+
+    print("✅ Domain resolution completed.")
+
+if __name__ == "__main__":
+    main()
