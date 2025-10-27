@@ -2,3 +2,4 @@ www.mevzuat.gov.tr
 www.wwwexpress.com.ph
 onlinebooking.wexpress.com.ph
 001c5501.pphosted.com
+*.yandex.ru
