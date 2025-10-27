@@ -2,7 +2,7 @@ name: Resolve Domains and Push IPs
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # Runs every 30 minutes
+    - cron: '*/30 * * * *'  # Every 30 minutes
   workflow_dispatch:
 
 jobs:
@@ -19,29 +19,21 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: |
-          pip install requests
+        run: pip install requests
 
       - name: Run domain resolution script
         run: |
           python resolve_domains.py
 
-      - name: Clone KETLED-IP-LIST repo
+      - name: Push resolved IPs to KETLED-IP-LIST repo
         env:
           TOKEN: ${{ secrets.KETLED_PUSH_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git clone https://x-access-token:${TOKEN}@github.com/rafnex18/KETLED-IP-LIST.git iplist
-
-      - name: Copy and commit resolved IPs
-  run: |
-    mv resolved_ips.txt iplist/ && \
-    cd iplist && \
-    git add resolved_ips.txt && \
-    if ! git diff --cached --quiet; then \
-      git commit -m "Update resolved IP list from ketled-domain-list" && \
-      git push; \
-    else \
-      echo "No changes to commit."; \
-    fi
+          mv resolved_ips.txt iplist/
+          cd iplist
+          git add resolved_ips.txt
+          git commit -m "Update resolved IP list from ketled-domain-list"
+          git push
