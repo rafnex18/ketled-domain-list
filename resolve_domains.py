@@ -1,7 +1,7 @@
 import socket
 from datetime import datetime
 
-INPUT_FILE = "domains.txt"
+INPUT_FILE = "KETLED-DOMAIN-LIST.txt"
 OUTPUT_FILE = "resolved_ips.txt"
 
 
