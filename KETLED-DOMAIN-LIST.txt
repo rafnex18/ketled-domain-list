@@ -2,3 +2,5 @@ www.mevzuat.gov.tr
 onlinebooking.wexpress.com.ph
 001c5501.pphosted.com
 *.mevzuat.gov.tr
+facebook.com
+*.yahoo.com
